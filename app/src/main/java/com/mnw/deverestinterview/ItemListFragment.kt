@@ -1,26 +1,24 @@
 package com.mnw.deverestinterview
 
-import android.content.ClipData
-import android.content.ClipDescription
-import android.os.Build
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.mnw.deverestinterview.app.MovieRecyclerViewAdapter
 import com.mnw.deverestinterview.placeholder.PlaceholderContent;
 import com.mnw.deverestinterview.databinding.FragmentItemListBinding
-import com.mnw.deverestinterview.databinding.ItemListContentBinding
 import com.mnw.deverestinterview.net.MoviesApi
 import com.mnw.deverestinterview.net.MoviesClient
 import kotlinx.coroutines.launch
@@ -98,9 +96,14 @@ class ItemListFragment : Fragment() {
         itemDetailFragmentContainer: View?
     ) {
 
-        recyclerView.adapter = SimpleItemRecyclerViewAdapter(
+        recyclerView.adapter = MovieRecyclerViewAdapter(
             PlaceholderContent.ITEMS, itemDetailFragmentContainer
         )
+    }
+
+    fun decodeBase64(imageString: String): Bitmap {
+        val bytes: ByteArray = Base64.decode(imageString, Base64.DEFAULT)
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
     }
 
     fun getMovieList() {
@@ -114,10 +117,11 @@ class ItemListFragment : Fragment() {
 
                         PlaceholderContent.clear()
                         response.body()?.movieList?.forEach { movie ->
-                            PlaceholderContent.addItem(PlaceholderContent.PlaceholderItem(movie.thumbnail.substring(0,4), movie.title, movie.overview))
+                            val item = PlaceholderContent.PlaceholderItem(movie.thumbnail.substring(0,4), movie.title, movie.overview, movie.releaseDate)
+                            PlaceholderContent.addItem(item)
                         }
 
-                        (binding.itemList.adapter as SimpleItemRecyclerViewAdapter).notifyDataSetChanged()
+                        (binding.itemList.adapter as MovieRecyclerViewAdapter).notifyDataSetChanged()
 
                     } else {
                         Toast.makeText(
@@ -130,95 +134,6 @@ class ItemListFragment : Fragment() {
                     Log.e("Error", Ex.localizedMessage)
                 }
             }
-        }
-
-    }
-
-    class SimpleItemRecyclerViewAdapter(
-        private val values: MutableList<PlaceholderContent.PlaceholderItem>,
-        private val itemDetailFragmentContainer: View?
-    ) :
-        RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-
-            val binding = ItemListContentBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            return ViewHolder(binding)
-
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.idView.text = item.id
-            holder.contentView.text = item.content
-
-            with(holder.itemView) {
-                tag = item
-                setOnClickListener { itemView ->
-                    val item = itemView.tag as PlaceholderContent.PlaceholderItem
-                    val bundle = Bundle()
-                    bundle.putString(
-                        ItemDetailFragment.ARG_ITEM_ID,
-                        item.id
-                    )
-                    if (itemDetailFragmentContainer != null) {
-                        itemDetailFragmentContainer.findNavController()
-                            .navigate(R.id.fragment_item_detail, bundle)
-                    } else {
-                        itemView.findNavController().navigate(R.id.show_item_detail, bundle)
-                    }
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    /**
-                     * Context click listener to handle Right click events
-                     * from mice and trackpad input to provide a more native
-                     * experience on larger screen devices
-                     */
-                    setOnContextClickListener { v ->
-                        val item = v.tag as PlaceholderContent.PlaceholderItem
-                        Toast.makeText(
-                            v.context,
-                            "Context click of item " + item.id,
-                            Toast.LENGTH_LONG
-                        ).show()
-                        true
-                    }
-                }
-
-                setOnLongClickListener { v ->
-                    // Setting the item id as the clip data so that the drop target is able to
-                    // identify the id of the content
-                    val clipItem = ClipData.Item(item.id)
-                    val dragData = ClipData(
-                        v.tag as? CharSequence,
-                        arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN),
-                        clipItem
-                    )
-
-                    if (Build.VERSION.SDK_INT >= 24) {
-                        v.startDragAndDrop(
-                            dragData,
-                            View.DragShadowBuilder(v),
-                            null,
-                            0
-                        )
-                    } else {
-                        v.startDrag(
-                            dragData,
-                            View.DragShadowBuilder(v),
-                            null,
-                            0
-                        )
-                    }
-                }
-            }
-        }
-
-        override fun getItemCount() = values.size
-
-        inner class ViewHolder(binding: ItemListContentBinding) : RecyclerView.ViewHolder(binding.root) {
-            val idView: TextView = binding.idText
-            val contentView: TextView = binding.content
         }
 
     }
