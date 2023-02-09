@@ -30,7 +30,12 @@ object PlaceholderContent {
         }
     }
 
-    private fun addItem(item: PlaceholderItem) {
+    fun clear() {
+        ITEMS.clear()
+        ITEM_MAP.clear()
+    }
+
+    fun addItem(item: PlaceholderItem) {
         ITEMS.add(item)
         ITEM_MAP.put(item.id, item)
     }

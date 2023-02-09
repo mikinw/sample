@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipDescription
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -12,11 +13,17 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.mnw.deverestinterview.placeholder.PlaceholderContent;
 import com.mnw.deverestinterview.databinding.FragmentItemListBinding
 import com.mnw.deverestinterview.databinding.ItemListContentBinding
+import com.mnw.deverestinterview.net.MoviesApi
+import com.mnw.deverestinterview.net.MoviesClient
+import kotlinx.coroutines.launch
 
 /**
  * A Fragment representing a list of Pings. This fragment
@@ -82,6 +89,8 @@ class ItemListFragment : Fragment() {
         val itemDetailFragmentContainer: View? = view.findViewById(R.id.item_detail_nav_container)
 
         setupRecyclerView(recyclerView, itemDetailFragmentContainer)
+
+        getMovieList()
     }
 
     private fun setupRecyclerView(
@@ -94,8 +103,39 @@ class ItemListFragment : Fragment() {
         )
     }
 
+    fun getMovieList() {
+        var retrofit = MoviesClient.getInstance()
+        var apiInterface = retrofit.create(MoviesApi::class.java)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                try {
+                    val response = apiInterface.searchMovies("a")
+                    if (response.isSuccessful) {
+
+                        PlaceholderContent.clear()
+                        response.body()?.movieList?.forEach { movie ->
+                            PlaceholderContent.addItem(PlaceholderContent.PlaceholderItem(movie.thumbnail.substring(0,4), movie.title, movie.overview))
+                        }
+
+                        (binding.itemList.adapter as SimpleItemRecyclerViewAdapter).notifyDataSetChanged()
+
+                    } else {
+                        Toast.makeText(
+                            context,
+                            response.errorBody().toString(),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }catch (Ex:Exception){
+                    Log.e("Error", Ex.localizedMessage)
+                }
+            }
+        }
+
+    }
+
     class SimpleItemRecyclerViewAdapter(
-        private val values: List<PlaceholderContent.PlaceholderItem>,
+        private val values: MutableList<PlaceholderContent.PlaceholderItem>,
         private val itemDetailFragmentContainer: View?
     ) :
         RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
