@@ -14,7 +14,8 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 private fun MovieData.toDatabaseEntity(): MovieRaw {
-    return MovieRaw(this.id, this.title, this.overview, this.releaseDate, this.posterPath)
+    val imageUrl = "https://image.tmdb.org/t/p/w342${this.posterPath}"
+    return MovieRaw(this.id, this.title, this.overview, this.releaseDate, imageUrl)
 }
 
 private fun MovieRaw.asDomainModel(): Movie {

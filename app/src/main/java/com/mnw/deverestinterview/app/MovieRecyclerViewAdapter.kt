@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.navigation.findNavController
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -15,13 +17,20 @@ import com.mnw.deverestinterview.R
 import com.mnw.deverestinterview.databinding.ItemListContentBinding
 import com.mnw.deverestinterview.model.Movie
 
+
+private class DiffCallback : DiffUtil.ItemCallback<Movie>() {
+
+    override fun areItemsTheSame(oldItem: Movie, newItem: Movie) =
+        oldItem.id == newItem.id
+
+    override fun areContentsTheSame(oldItem: Movie, newItem: Movie) =
+        oldItem == newItem
+}
+
+
 class MovieRecyclerViewAdapter(
     private val itemDetailFragmentContainer: View?
-) :
-    RecyclerView.Adapter<MovieRecyclerViewAdapter.ViewHolder>() {
-
-    private var movies: MutableList<Movie> = ArrayList()
-
+) : ListAdapter<Movie, MovieRecyclerViewAdapter.ViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -31,16 +40,15 @@ class MovieRecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = movies[position]
+        val item = currentList[position]
         holder.movieTitle.text = item.title
         holder.overview.text = item.overview
         holder.releaseDate.text = item.releaseDate
 
         if (item.posterPath.isNotBlank()) {
-            val imageUrl = "https://image.tmdb.org/t/p/w342${item.posterPath}"
             Glide
                 .with(holder.itemView)
-                .load(imageUrl)
+                .load(item.posterPath)
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .centerCrop()
                 .into(holder.thumbnail)
@@ -67,13 +75,6 @@ class MovieRecyclerViewAdapter(
         }
     }
 
-    override fun getItemCount() = movies.size
-
-    fun setMovies(it: List<Movie>) {
-        movies = ArrayList(it)
-        notifyDataSetChanged()
-
-    }
 
     inner class ViewHolder(binding: ItemListContentBinding) : RecyclerView.ViewHolder(binding.root) {
         val movieTitle: TextView = binding.textTitle

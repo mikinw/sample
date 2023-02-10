@@ -42,7 +42,7 @@ class ItemListFragment : Fragment() {
         setupRecyclerView(recyclerView, itemDetailFragmentContainer)
 
         viewModel.movieList.observe(viewLifecycleOwner) {
-            (binding.itemList.adapter as MovieRecyclerViewAdapter).setMovies(it)
+            (binding.itemList.adapter as MovieRecyclerViewAdapter).submitList(it)
         }
 
         viewModel.getMovieList()
