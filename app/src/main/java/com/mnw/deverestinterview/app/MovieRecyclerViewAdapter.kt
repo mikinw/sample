@@ -15,13 +15,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mnw.deverestinterview.ItemDetailFragment
 import com.mnw.deverestinterview.R
 import com.mnw.deverestinterview.databinding.ItemListContentBinding
+import com.mnw.deverestinterview.model.Movie
 import com.mnw.deverestinterview.placeholder.PlaceholderContent
 
 class MovieRecyclerViewAdapter(
-    private val values: MutableList<PlaceholderContent.PlaceholderItem>,
     private val itemDetailFragmentContainer: View?
 ) :
     RecyclerView.Adapter<MovieRecyclerViewAdapter.ViewHolder>() {
+
+    private var movies: MutableList<Movie> = ArrayList()
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -31,7 +34,7 @@ class MovieRecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = values[position]
+        val item = movies[position]
         holder.movieTitle.text = item.title
         holder.overview.text = item.overview
         holder.thumbnail.setImageBitmap(item.thumbnail)
@@ -39,7 +42,7 @@ class MovieRecyclerViewAdapter(
         with(holder.itemView) {
             tag = item
             setOnClickListener { itemView ->
-                val item = itemView.tag as PlaceholderContent.PlaceholderItem
+                val item = itemView.tag as Movie
                 val bundle = Bundle()
                 bundle.putString(
                     ItemDetailFragment.ARG_ITEM_ID,
@@ -52,21 +55,19 @@ class MovieRecyclerViewAdapter(
                     itemView.findNavController().navigate(R.id.show_item_detail, bundle)
                 }
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                /**
-                 * Context click listener to handle Right click events
-                 * from mice and trackpad input to provide a more native
-                 * experience on larger screen devices
-                 */
-                setOnContextClickListener { v ->
-                    val item = v.tag as PlaceholderContent.PlaceholderItem
-                    Toast.makeText(
-                        v.context,
-                        "Context click of item " + item.id,
-                        Toast.LENGTH_LONG
-                    ).show()
-                    true
-                }
+            /**
+             * Context click listener to handle Right click events
+             * from mice and trackpad input to provide a more native
+             * experience on larger screen devices
+             */
+            setOnContextClickListener { v ->
+                val item = v.tag as PlaceholderContent.PlaceholderItem
+                Toast.makeText(
+                    v.context,
+                    "Context click of item " + item.id,
+                    Toast.LENGTH_LONG
+                ).show()
+                true
             }
 
             setOnLongClickListener { v ->
@@ -79,26 +80,23 @@ class MovieRecyclerViewAdapter(
                     clipItem
                 )
 
-                if (Build.VERSION.SDK_INT >= 24) {
-                    v.startDragAndDrop(
-                        dragData,
-                        View.DragShadowBuilder(v),
-                        null,
-                        0
-                    )
-                } else {
-                    v.startDrag(
-                        dragData,
-                        View.DragShadowBuilder(v),
-                        null,
-                        0
-                    )
-                }
+                v.startDragAndDrop(
+                    dragData,
+                    View.DragShadowBuilder(v),
+                    null,
+                    0
+                )
             }
         }
     }
 
-    override fun getItemCount() = values.size
+    override fun getItemCount() = movies.size
+
+    fun setMovies(it: List<Movie>) {
+        movies = ArrayList(it)
+        notifyDataSetChanged()
+
+    }
 
     inner class ViewHolder(binding: ItemListContentBinding) : RecyclerView.ViewHolder(binding.root) {
         val movieTitle: TextView = binding.textTitle
