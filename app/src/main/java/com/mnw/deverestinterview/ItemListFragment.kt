@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.mnw.deverestinterview.app.MovieRecyclerViewAdapter
 import com.mnw.deverestinterview.databinding.FragmentItemListBinding
@@ -19,14 +20,12 @@ class ItemListFragment : Fragment() {
 
     private var _binding: FragmentItemListBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentItemListBinding.inflate(inflater, container, false)
         return binding.root
@@ -58,6 +57,11 @@ class ItemListFragment : Fragment() {
         recyclerView.adapter = MovieRecyclerViewAdapter(
             itemDetailFragmentContainer
         )
+        val dividerItemDecoration = DividerItemDecoration(
+            recyclerView.context,
+            DividerItemDecoration.VERTICAL
+        )
+        recyclerView.addItemDecoration(dividerItemDecoration)
     }
 
 

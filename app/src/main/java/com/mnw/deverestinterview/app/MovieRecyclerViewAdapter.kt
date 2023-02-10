@@ -1,22 +1,17 @@
 package com.mnw.deverestinterview.app
 
-import android.content.ClipData
-import android.content.ClipDescription
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.mnw.deverestinterview.ItemDetailFragment
 import com.mnw.deverestinterview.R
 import com.mnw.deverestinterview.databinding.ItemListContentBinding
 import com.mnw.deverestinterview.model.Movie
-import com.mnw.deverestinterview.placeholder.PlaceholderContent
 
 class MovieRecyclerViewAdapter(
     private val itemDetailFragmentContainer: View?
@@ -37,6 +32,7 @@ class MovieRecyclerViewAdapter(
         val item = movies[position]
         holder.movieTitle.text = item.title
         holder.overview.text = item.overview
+        holder.releaseDate.text = item.releaseDate
         holder.thumbnail.setImageBitmap(item.thumbnail)
 
         with(holder.itemView) {
