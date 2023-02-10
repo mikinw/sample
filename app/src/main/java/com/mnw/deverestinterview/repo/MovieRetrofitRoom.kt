@@ -1,5 +1,6 @@
 package com.mnw.deverestinterview.repo
 
+import android.accounts.NetworkErrorException
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
@@ -11,13 +12,13 @@ import com.mnw.deverestinterview.model.NetworkState
 import com.mnw.deverestinterview.model.NetworkStateModel
 import com.mnw.deverestinterview.net.MovieData
 import com.mnw.deverestinterview.net.MoviesApi
+import com.mnw.deverestinterview.net.MoviesDbConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-private fun MovieData.toDatabaseEntity(): MovieRaw {
-    val imageUrl = "https://image.tmdb.org/t/p/w342${this.posterPath}"
-    return MovieRaw(this.id, this.title, this.overview, this.releaseDate, imageUrl)
+private fun MovieData.toDatabaseEntity(posterPathBuilder: (String) -> String): MovieRaw {
+    return MovieRaw(this.id, this.title, this.overview, this.releaseDate, posterPathBuilder(this.posterPath))
 }
 
 private fun MovieRaw.asDomainModel(): Movie {
@@ -40,6 +41,24 @@ class MovieRetrofitRoom @Inject constructor(
             try {
                 networkState.requestState(NetworkState.REFRESHING)
 
+                val configuration = moviesApi.getConfiguration()
+
+                val posterPathBuilder =
+                    if (configuration.isSuccessful) {
+                        val body = configuration.body()
+                            ?: throw NetworkErrorException("Can't get configuration data. Body is empty")
+
+                        Log.i("ASD", "${body.imagesConfig.posterSizes}")
+
+                        val selectSize = selectSize(body)
+                            ?: throw NetworkErrorException("Configuration does not have a size value")
+
+                        val ret: (String) -> String = { "${body.imagesConfig.secureBaseUrl}$selectSize$it" }
+                        ret
+                    } else {
+                        throw NetworkErrorException("Can't get configuration data")
+                    }
+
                 val response = moviesApi.searchMovies("a")
 
                 if (response.isSuccessful) {
@@ -49,7 +68,7 @@ class MovieRetrofitRoom @Inject constructor(
                         body.movieList
                             ?.map { movie ->
                                 freshIds.add(movie.id)
-                                movie.toDatabaseEntity()
+                                movie.toDatabaseEntity(posterPathBuilder)
                             }
                             ?.toList()
                             ?.let {
@@ -77,4 +96,6 @@ class MovieRetrofitRoom @Inject constructor(
         }
 
     }
+
+    private fun selectSize(body: MoviesDbConfiguration) = body.imagesConfig.posterSizes.getOrNull(0)
 }

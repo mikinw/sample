@@ -60,8 +60,6 @@ class ItemListFragment : Fragment() {
             }
         }
 
-        viewModel.getMovieList()
-
     }
 
     private fun setupRecyclerView(

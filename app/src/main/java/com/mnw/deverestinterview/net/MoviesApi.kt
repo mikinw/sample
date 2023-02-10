@@ -11,4 +11,7 @@ interface MoviesApi {
     suspend fun searchMovies(
         @Query("query") search: String
     ): Response<Movies>
+
+    @GET("/3/configuration")
+    suspend fun getConfiguration(): Response<MoviesDbConfiguration>
 }
