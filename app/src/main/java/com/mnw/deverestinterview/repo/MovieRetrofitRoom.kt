@@ -7,6 +7,8 @@ import com.mnw.deverestinterview.db.MovieDao
 import com.mnw.deverestinterview.db.MovieRaw
 import com.mnw.deverestinterview.model.Movie
 import com.mnw.deverestinterview.model.MovieRepo
+import com.mnw.deverestinterview.model.NetworkState
+import com.mnw.deverestinterview.model.NetworkStateModel
 import com.mnw.deverestinterview.net.MovieData
 import com.mnw.deverestinterview.net.MoviesApi
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +27,9 @@ private fun MovieRaw.asDomainModel(): Movie {
 class MovieRetrofitRoom @Inject constructor(
     private val moviesApi: MoviesApi,
     private val movieDao: MovieDao,
-): MovieRepo {
+    private val networkState: NetworkStateModel,
+
+    ): MovieRepo {
 
     override val movies: LiveData<List<Movie>> = Transformations.map(movieDao.getAll()) {
         it.map { raw -> raw.asDomainModel() }.toList()
@@ -34,6 +38,8 @@ class MovieRetrofitRoom @Inject constructor(
     override suspend fun refreshAll() {
         withContext(Dispatchers.IO) {
             try {
+                networkState.requestState(NetworkState.REFRESHING)
+
                 val response = moviesApi.searchMovies("a")
 
                 if (response.isSuccessful) {
@@ -46,12 +52,19 @@ class MovieRetrofitRoom @Inject constructor(
                             movieDao.insertAll(it)
                         }
 
+                    networkState.requestState(NetworkState.NO_ACTIVITY)
+
+
                 } else {
 
                     Log.e("ASD", "could not fetch api: ${response.errorBody().toString()}")
+                    networkState.requestState(NetworkState.ERROR, response.errorBody().toString())
+
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()
+                networkState.requestState(NetworkState.ERROR, ex.localizedMessage)
+
 
             }
         }

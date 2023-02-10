@@ -2,4 +2,7 @@
     <string name="app_name">Deverest interview</string>
     <string name="title_item_detail">Item Detail</string>
     <string name="movie_poster">movie poster</string>
+    <string name="network_refreshing">Refreshing…</string>
+    <string name="network_offline">You are currently offline</string>
+    <string name="network_error">Error while downloading</string>
 </resources>
