@@ -5,14 +5,14 @@ import com.google.gson.annotations.SerializedName
 data class Movies(
 
     @SerializedName("page")
-    var page: Int,
+    val page: Int,
     @SerializedName("total_results")
-    var totalResults: Int,
+    val totalResults: Int,
     @SerializedName("total_pages")
-    var totalPages: Int,
+    val totalPages: Int,
 
     @SerializedName("results")
-    var movieList: List<MovieData>? = null,
+    val movieList: List<MovieData>? = null,
 
 
     )
@@ -20,13 +20,13 @@ data class Movies(
 
 data class MovieData(
     @SerializedName("id")
-    var id: Int,
+    val id: Int,
     @SerializedName("title")
-    var title: String,
+    val title: String,
     @SerializedName("overview")
-    var overview: String,
+    val overview: String,
     @SerializedName("poster_path")
-    var posterPath: String,
+    val posterPath: String,
     @SerializedName("release_date")
-    var releaseDate: String,
+    val releaseDate: String,
 )
