@@ -11,13 +11,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.mnw.deverestinterview.placeholder.PlaceholderContent
 import com.mnw.deverestinterview.databinding.FragmentItemDetailBinding
+import dagger.hilt.android.AndroidEntryPoint
 
-/**
- * A fragment representing a single Item detail screen.
- * This fragment is either contained in a [ItemListFragment]
- * in two-pane mode (on larger screen devices) or self-contained
- * on handsets.
- */
+
+@AndroidEntryPoint
 class ItemDetailFragment : Fragment() {
 
     /**
@@ -52,7 +49,7 @@ class ItemDetailFragment : Fragment() {
                 // Load the placeholder content specified by the fragment
                 // arguments. In a real-world scenario, use a Loader
                 // to load content from a content provider.
-                item = PlaceholderContent.ITEM_MAP[it.getString(ARG_ITEM_ID)]
+                item = PlaceholderContent.ITEM_MAP[it.getInt(ARG_ITEM_ID).toString()]
             }
         }
     }

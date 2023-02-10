@@ -9,8 +9,10 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import com.mnw.deverestinterview.app.MovieRecyclerViewAdapter
 import com.mnw.deverestinterview.databinding.FragmentItemListBinding
+import dagger.hilt.android.AndroidEntryPoint
 
 
+@AndroidEntryPoint
 class ItemListFragment : Fragment() {
 
     private val viewModel: ItemListViewModel by viewModels()

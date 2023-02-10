@@ -1,6 +1,7 @@
 package com.mnw.deverestinterview
 
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
 
 /**
  *
@@ -22,6 +23,7 @@ Requirements are:
 
  */
 
+@HiltAndroidApp
 class MovieApplication: Application() {
 
     override fun onCreate() {

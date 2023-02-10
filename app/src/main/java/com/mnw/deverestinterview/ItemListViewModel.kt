@@ -6,10 +6,13 @@ import com.mnw.deverestinterview.model.Movie
 import com.mnw.deverestinterview.net.MoviesApi
 import com.mnw.deverestinterview.net.MoviesClient
 import com.mnw.deverestinterview.placeholder.PlaceholderContent
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
-class ItemListViewModel: ViewModel() {
+@HiltViewModel
+class ItemListViewModel @Inject constructor(): ViewModel() {
 
     private val _movieList = MutableLiveData<List<Movie>>()
     val movieList: LiveData<List<Movie>>
@@ -28,7 +31,7 @@ class ItemListViewModel: ViewModel() {
                     _movieList.value = response.body()
                         ?.movieList
                         ?.map { movie ->
-                            Movie(movie.thumbnail.substring(0,4), movie.title, movie.overview, movie.releaseDate)
+                            Movie(movie.id, movie.title, movie.overview, movie.releaseDate)
                         }
                         ?.toList()
 

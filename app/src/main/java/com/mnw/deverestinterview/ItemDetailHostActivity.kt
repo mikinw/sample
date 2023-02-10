@@ -8,9 +8,10 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.mnw.deverestinterview.databinding.ActivityItemDetailBinding
+import dagger.hilt.android.AndroidEntryPoint
 
 
-
+@AndroidEntryPoint
 class ItemDetailHostActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration

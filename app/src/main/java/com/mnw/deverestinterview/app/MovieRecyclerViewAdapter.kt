@@ -44,7 +44,7 @@ class MovieRecyclerViewAdapter(
             setOnClickListener { itemView ->
                 val item = itemView.tag as Movie
                 val bundle = Bundle()
-                bundle.putString(
+                bundle.putInt(
                     ItemDetailFragment.ARG_ITEM_ID,
                     item.id
                 )
@@ -55,38 +55,7 @@ class MovieRecyclerViewAdapter(
                     itemView.findNavController().navigate(R.id.show_item_detail, bundle)
                 }
             }
-            /**
-             * Context click listener to handle Right click events
-             * from mice and trackpad input to provide a more native
-             * experience on larger screen devices
-             */
-            setOnContextClickListener { v ->
-                val item = v.tag as PlaceholderContent.PlaceholderItem
-                Toast.makeText(
-                    v.context,
-                    "Context click of item " + item.id,
-                    Toast.LENGTH_LONG
-                ).show()
-                true
-            }
 
-            setOnLongClickListener { v ->
-                // Setting the item id as the clip data so that the drop target is able to
-                // identify the id of the content
-                val clipItem = ClipData.Item(item.id)
-                val dragData = ClipData(
-                    v.tag as? CharSequence,
-                    arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN),
-                    clipItem
-                )
-
-                v.startDragAndDrop(
-                    dragData,
-                    View.DragShadowBuilder(v),
-                    null,
-                    0
-                )
-            }
         }
     }
 
