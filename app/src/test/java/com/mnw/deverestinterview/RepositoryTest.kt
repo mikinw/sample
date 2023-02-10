@@ -71,10 +71,10 @@ class RepositoryTest {
         // init
         val dummyMovieList = MutableLiveData(
             listOf(
-                MovieRaw(1, "titleA", "overviewA", "", ""),
-                MovieRaw(2, "titleB", "overviewB", "", ""),
-                MovieRaw(3, "titleC", "overviewC", "", ""),
-                MovieRaw(4, "titleD", "overviewD", "", ""),
+                MovieRaw(1, "titleA", "overviewA", "", "", 0),
+                MovieRaw(2, "titleB", "overviewB", "", "", 0),
+                MovieRaw(3, "titleC", "overviewC", "", "", 0),
+                MovieRaw(4, "titleD", "overviewD", "", "", 0),
             )
         )
         whenever(mockMovieDao.getAll()).thenReturn(dummyMovieList as LiveData<List<MovieRaw>>)
@@ -88,7 +88,7 @@ class RepositoryTest {
 
 
         // run
-        sut = MovieRetrofitRoom(mockMoviesApi, mockMovieDao, networkStateModel)
+        sut = MovieRetrofitRoom(mockMoviesApi, mockMovieDao)
         sut.movies.observeForever(mockObserver)
 
         assertThat(latestMovieList).hasSize(4)
@@ -109,19 +109,19 @@ class RepositoryTest {
         runTest {
             launch(Dispatchers.Main) {
                 // init
-                appDatabase.movieDao().insert(MovieRaw(1, "titleA", "overviewA", "", ""))
-                appDatabase.movieDao().insert(MovieRaw(2, "titleB", "overviewB", "", ""))
-                appDatabase.movieDao().insert(MovieRaw(3, "titleC", "overviewC", "", ""))
-                appDatabase.movieDao().insert(MovieRaw(4, "titleD", "overviewD", "", ""))
+                appDatabase.movieDao().insert(MovieRaw(1, "titleA", "overviewA", "", "", 0))
+                appDatabase.movieDao().insert(MovieRaw(2, "titleB", "overviewB", "", "", 0))
+                appDatabase.movieDao().insert(MovieRaw(3, "titleC", "overviewC", "", "", 0))
+                appDatabase.movieDao().insert(MovieRaw(4, "titleD", "overviewD", "", "", 0))
 
                 val dummyMovies = Movies(
                     page = anyNumber,
                     totalResults = anyNumber,
                     totalPages = anyNumber,
                     movieList = listOf(
-                        MovieData(3, "titleBB", "artistBB", "", ""),
-                        MovieData(5, "titleE", "artistE", "", ""),
-                        MovieData(6, "titleF", "artistF", "imageId", ""),
+                        MovieData(3, "titleBB", "artistBB", "", "", 0),
+                        MovieData(5, "titleE", "artistE", "", "", 0),
+                        MovieData(6, "titleF", "artistF", "imageId", "", 0),
                     ))
                 whenever(mockMoviesApi.searchMovies(any())).thenReturn(Response.success(dummyMovies))
 
@@ -131,13 +131,15 @@ class RepositoryTest {
                 val mockObserver = Observer<List<Movie>> {
                     latestMovieList = it
                 }
+                
+                val mockConfigJobFetch = async { {_: String -> ""} }
 
 
                 // run
-                sut = MovieRetrofitRoom(mockMoviesApi, appDatabase.movieDao(), networkStateModel)
+                sut = MovieRetrofitRoom(mockMoviesApi, appDatabase.movieDao())
                 sut.movies.observeForever(mockObserver)
 
-                sut.refreshAll(configJob)
+                sut.refreshAll(mockConfigJobFetch)
 
                 advanceUntilIdle()
 
