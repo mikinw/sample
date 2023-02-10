@@ -29,4 +29,6 @@ data class MovieData(
     val posterPath: String,
     @SerializedName("release_date")
     val releaseDate: String,
+    @SerializedName("budget")
+    val budget: Int?,
 )

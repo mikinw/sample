@@ -137,7 +137,7 @@ class RepositoryTest {
                 sut = MovieRetrofitRoom(mockMoviesApi, appDatabase.movieDao(), networkStateModel)
                 sut.movies.observeForever(mockObserver)
 
-                sut.refreshAll()
+                sut.refreshAll(configJob)
 
                 advanceUntilIdle()
 

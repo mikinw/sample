@@ -31,12 +31,18 @@ class RefreshMoviesUseCase constructor(
                     posterPathBuilder
                 }
 
-                val refreshListJob = launch {
+                launch {
                     movieRepo.refreshAll(configJob)
-                }
+                }.join()
 
-                refreshListJob.join()
-
+                launch {
+                    movieRepo.movies.value.orEmpty().map { movie -> movie.id }.forEach {
+                        launch {
+                            delay(500)
+                            movieRepo.getDetails(it, configJob)
+                        }
+                    }
+                }.join()
 
                 networkState.requestState(NetworkState.NO_ACTIVITY)
 

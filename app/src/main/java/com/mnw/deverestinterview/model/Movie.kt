@@ -7,4 +7,5 @@ data class Movie(
     val overview: String,
     val releaseDate: String = "",
     val posterPath: String = "",
+    val budget: Int? = null,
 )

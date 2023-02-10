@@ -59,4 +59,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:text="2013-12-24"
         />
+
+    <TextView
+        android:id="@+id/textBudget"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/text_margin"
+        android:layout_marginBottom="@dimen/container_margin"
+        android:layout_marginTop="@dimen/container_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/textOverview"
+        tools:text="$100000"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>

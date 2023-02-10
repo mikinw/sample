@@ -8,8 +8,6 @@ import com.mnw.deverestinterview.db.MovieDao
 import com.mnw.deverestinterview.db.MovieRaw
 import com.mnw.deverestinterview.model.Movie
 import com.mnw.deverestinterview.model.MovieRepo
-import com.mnw.deverestinterview.model.NetworkState
-import com.mnw.deverestinterview.model.NetworkStateModel
 import com.mnw.deverestinterview.net.MovieData
 import com.mnw.deverestinterview.net.MoviesApi
 import kotlinx.coroutines.*
@@ -17,11 +15,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private fun MovieData.toDatabaseEntity(posterPathBuilder: (String) -> String): MovieRaw {
-    return MovieRaw(this.id, this.title, this.overview, this.releaseDate, posterPathBuilder(this.posterPath))
+    return MovieRaw(this.id, this.title, this.overview, this.releaseDate, posterPathBuilder(this.posterPath), this.budget)
 }
 
 private fun MovieRaw.asDomainModel(): Movie {
-    return Movie(this.id, this.title, this.overview, this.releaseDate, this.posterPath)
+    return Movie(this.id, this.title, this.overview, this.releaseDate, this.posterPath, this.budget)
 }
 
 @Singleton
@@ -38,13 +36,13 @@ class MovieRetrofitRoom constructor(
     ) : this(moviesApi, movieDao, Dispatchers.IO)
 
     override val movies: LiveData<List<Movie>> = Transformations.map(movieDao.getAll()) {
+        Log.i("ASD", "Transformations")
+
         it.map { raw -> raw.asDomainModel() }.toList()
     }
 
     override suspend fun refreshAll(configJob: Deferred<(String) -> String>) {
         withContext(dispatcher) {
-
-            Log.i("ASD", "refreshAll start")
 
             val response = moviesApi.searchMovies("a")
 
@@ -67,6 +65,8 @@ class MovieRetrofitRoom constructor(
                         }
 
                     movieDao.deleteExcept(freshIds)
+                    Log.i("ASD", "refreshAll done")
+
                 }
 
 
@@ -77,11 +77,38 @@ class MovieRetrofitRoom constructor(
 
             }
 
-            Log.i("ASD", "refreshAll end")
-
 
         }
 
+    }
+
+    override suspend fun getDetails(id: Int, configJob: Deferred<(String) -> String>) {
+
+        withContext(dispatcher) {
+
+            val response = moviesApi.getDetails(id)
+
+            if (response.isSuccessful) {
+                val movieData = response.body()
+                    ?: throw NetworkErrorException("Can't get detail for $id")
+
+                val posterPathBuilder = configJob.await()
+
+                val movieRaw = movieData.toDatabaseEntity(posterPathBuilder)
+
+                Log.i("ASD", "new budget for $id: ${movieRaw.budget}")
+                movieDao.insert(movieRaw)
+
+
+            } else {
+
+                Log.e("ASD", "could not fetch api: ${response.errorBody().toString()}")
+                throw NetworkErrorException(response.errorBody().toString())
+
+            }
+
+
+        }
     }
 
 }

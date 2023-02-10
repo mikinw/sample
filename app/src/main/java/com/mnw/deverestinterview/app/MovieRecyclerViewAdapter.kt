@@ -1,5 +1,7 @@
 package com.mnw.deverestinterview.app
 
+import android.icu.text.DecimalFormat
+import android.icu.text.DecimalFormatSymbols
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +18,7 @@ import com.mnw.deverestinterview.ItemDetailFragment
 import com.mnw.deverestinterview.R
 import com.mnw.deverestinterview.databinding.ItemListContentBinding
 import com.mnw.deverestinterview.model.Movie
+import java.util.*
 
 
 private class DiffCallback : DiffUtil.ItemCallback<Movie>() {
@@ -32,6 +35,10 @@ class MovieRecyclerViewAdapter(
     private val itemDetailFragmentContainer: View?
 ) : ListAdapter<Movie, MovieRecyclerViewAdapter.ViewHolder>(DiffCallback()) {
 
+    private val decimalFormat = DecimalFormat("#,###", DecimalFormatSymbols(Locale.ROOT).apply {
+        groupingSeparator = ' '
+    })
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
         val binding = ItemListContentBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -44,6 +51,12 @@ class MovieRecyclerViewAdapter(
         holder.movieTitle.text = item.title
         holder.overview.text = item.overview
         holder.releaseDate.text = item.releaseDate
+        if (item.budget == null) {
+            holder.budget.visibility = View.GONE
+        } else {
+            holder.budget.visibility = View.VISIBLE
+            holder.budget.text = "$${decimalFormat.format(item.budget)}"
+        }
 
         if (item.posterPath.isNotBlank()) {
             Glide
@@ -80,6 +93,7 @@ class MovieRecyclerViewAdapter(
         val movieTitle: TextView = binding.textTitle
         val overview: TextView = binding.textOverview
         val releaseDate: TextView = binding.textReleaseDate
+        val budget: TextView = binding.textBudget
         val thumbnail: ImageView = binding.imageThumbnail
     }
 
