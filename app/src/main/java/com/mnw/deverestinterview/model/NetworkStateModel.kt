@@ -55,6 +55,13 @@ class NetworkStateModel @Inject constructor(@ApplicationContext applicationConte
                     _networkState.postValue(NetworkState.ERROR)
                 }
             }
+            NetworkState.NO_ACTIVITY -> {
+                if (!NetworkUtil.isNetworkConnected(connectivityManager)) {
+                    _networkState.postValue(NetworkState.OFFLINE)
+                } else if (_networkState.value != NetworkState.ERROR) {
+                    _networkState.postValue(NetworkState.NO_ACTIVITY)
+                }
+            }
             else -> {
                 _networkState.postValue(requestedState)
             }

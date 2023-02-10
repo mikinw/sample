@@ -1,6 +1,7 @@
 package com.mnw.deverestinterview
 
 import android.app.Application
+import com.mnw.deverestinterview.net.MoviesClient
 import dagger.hilt.android.HiltAndroidApp
 
 /**

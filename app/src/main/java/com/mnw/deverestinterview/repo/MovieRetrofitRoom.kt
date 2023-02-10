@@ -41,16 +41,20 @@ class MovieRetrofitRoom constructor(
         it.map { raw -> raw.asDomainModel() }.toList()
     }
 
-    override suspend fun refreshAll(configJob: Deferred<(String) -> String>) {
+    override suspend fun refreshAll(configJob: Deferred<((String) -> String)?>) {
         withContext(dispatcher) {
 
+            Log.i("ASD", "refreshall 1")
+
             val response = moviesApi.searchMovies("a")
+            Log.i("ASD", "refreshall 2")
 
             if (response.isSuccessful) {
                 response.body()?.let { body ->
                     val freshIds = ArrayList<Int>()
 
                     val posterPathBuilder = configJob.await()
+                        ?: throw NetworkErrorException("Fetching configuration was unsuccessful")
 
 
                     body.movieList
@@ -78,11 +82,13 @@ class MovieRetrofitRoom constructor(
             }
 
 
+
+
         }
 
     }
 
-    override suspend fun getDetails(id: Int, configJob: Deferred<(String) -> String>) {
+    override suspend fun getDetails(id: Int, configJob: Deferred<((String) -> String)?>) {
 
         withContext(dispatcher) {
 
@@ -93,6 +99,7 @@ class MovieRetrofitRoom constructor(
                     ?: throw NetworkErrorException("Can't get detail for $id")
 
                 val posterPathBuilder = configJob.await()
+                    ?: throw NetworkErrorException("Fetching configuration was unsuccessful")
 
                 val movieRaw = movieData.toDatabaseEntity(posterPathBuilder)
 

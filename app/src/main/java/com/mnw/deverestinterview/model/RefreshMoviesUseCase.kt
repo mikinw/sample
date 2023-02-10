@@ -26,20 +26,39 @@ class RefreshMoviesUseCase constructor(
                 networkState.requestState(NetworkState.REFRESHING)
 
                 val configJob = async {
-                    val config = configRepository.getConfig()
-                    val posterPathBuilder: (String) -> String = { "${config.basePath}${config.size}$it" }
-                    posterPathBuilder
+                    var ret: ((String) -> String)? = null
+                    try {
+                        val config = configRepository.getConfig()
+                        val posterPathBuilder: (String) -> String = { "${config.basePath}${config.size}$it" }
+                        ret = posterPathBuilder
+                    } catch (ex: Exception) {
+                        Log.e("ASD", "configJob ex: ${ex.localizedMessage}")
+                        networkState.requestState(NetworkState.ERROR, ex.localizedMessage)
+
+                    }
+                    ret
                 }
 
                 launch {
-                    movieRepo.refreshAll(configJob)
+                    try {
+
+                        movieRepo.refreshAll(configJob)
+                    } catch (ex: Exception) {
+                        Log.e("ASD", "refreshall ex: ${ex.localizedMessage}")
+                        networkState.requestState(NetworkState.ERROR, ex.localizedMessage)
+                    }
                 }.join()
+
 
                 launch {
                     movieRepo.movies.value.orEmpty().map { movie -> movie.id }.forEach {
                         launch {
-                            delay(500)
-                            movieRepo.getDetails(it, configJob)
+                            try {
+                                movieRepo.getDetails(it, configJob)
+                            } catch (ex: Exception) {
+                                Log.e("ASD", "refreshall ex: ${ex.localizedMessage}")
+                                networkState.requestState(NetworkState.ERROR, ex.localizedMessage)
+                            }
                         }
                     }
                 }.join()
@@ -48,6 +67,7 @@ class RefreshMoviesUseCase constructor(
 
             } catch (ex: Exception) {
                 ex.printStackTrace()
+                Log.e("ASD", ex.localizedMessage as String)
                 networkState.requestState(NetworkState.ERROR, ex.localizedMessage)
 
 
