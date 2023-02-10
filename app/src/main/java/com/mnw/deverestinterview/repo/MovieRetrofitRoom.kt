@@ -15,7 +15,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private fun MovieData.toDatabaseEntity(posterPathBuilder: (String) -> String): MovieRaw {
-    return MovieRaw(this.id, this.title, this.overview, this.releaseDate, posterPathBuilder(this.posterPath), this.budget)
+    val poster = if (this.posterPath != null) posterPathBuilder(this.posterPath) else ""
+    return MovieRaw(this.id, this.title, this.overview, this.releaseDate, poster, this.budget)
 }
 
 private fun MovieRaw.asDomainModel(): Movie {
@@ -39,10 +40,10 @@ class MovieRetrofitRoom constructor(
         it.map { raw -> raw.asDomainModel() }.toList()
     }
 
-    override suspend fun refreshAll(configJob: Deferred<((String) -> String)?>) {
+    override suspend fun refreshAll(query: String, configJob: Deferred<((String) -> String)?>) {
         withContext(dispatcher) {
 
-            val response = moviesApi.searchMovies("a")
+            val response = moviesApi.searchMovies(query)
 
             if (response.isSuccessful) {
                 response.body()?.let { body ->

@@ -16,16 +16,25 @@ class ItemListViewModel @Inject constructor(
 ): ViewModel() {
 
 
-    init {
-        getMovieList()
-    }
-
     val movieList = movieRepo.movies
 
+    var query: String = ""
 
-    fun getMovieList() {
-        viewModelScope.launch {
-            refreshMoviesUseCase()
+
+    fun refresh() {
+        if (query.isNotBlank()) {
+            viewModelScope.launch {
+                refreshMoviesUseCase(query)
+            }
         }
     }
+
+    fun setQueryString(query: String?) {
+        if (!query.isNullOrBlank()) {
+            this.query = query
+
+            refresh()
+        }
+    }
+
 }

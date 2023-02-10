@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -12,6 +13,7 @@ import com.mnw.deverestinterview.app.MovieRecyclerViewAdapter
 import com.mnw.deverestinterview.databinding.FragmentItemListBinding
 import com.mnw.deverestinterview.model.NetworkState
 import com.mnw.deverestinterview.model.NetworkStateModel
+import com.mnw.deverestinterview.model.RefreshMoviesUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -26,6 +28,8 @@ class ItemListFragment : Fragment() {
 
     @Inject
     lateinit var networkStateModel: NetworkStateModel
+    @Inject
+    lateinit var refreshMoviesUseCase: RefreshMoviesUseCase
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,8 +55,21 @@ class ItemListFragment : Fragment() {
         }
 
         binding.swipeContainer.setOnRefreshListener {
-            viewModel.getMovieList()
+            viewModel.refresh()
         }
+
+
+        binding.searchView!!.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.setQueryString(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
+
 
         networkStateModel.networkState.observe(viewLifecycleOwner) {
             if (it == NetworkState.NO_ACTIVITY) {

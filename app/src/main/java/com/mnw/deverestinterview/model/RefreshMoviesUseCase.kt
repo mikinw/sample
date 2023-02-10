@@ -18,7 +18,7 @@ class RefreshMoviesUseCase constructor(
     ) : this(configRepository, movieRepo, networkState, Dispatchers.Default)
 
 
-    suspend operator fun invoke() {
+    suspend operator fun invoke(query: String) {
         withContext(dispatcher) {
 
             try {
@@ -42,9 +42,10 @@ class RefreshMoviesUseCase constructor(
                 launch {
                     try {
 
-                        movieRepo.refreshAll(configJob)
+                        movieRepo.refreshAll(query, configJob)
                     } catch (ex: Exception) {
                         Log.e("ASD", "refreshall ex: ${ex.localizedMessage}")
+                        ex.printStackTrace()
                         networkState.requestState(NetworkState.ERROR, ex.localizedMessage)
                     }
                 }.join()
@@ -56,7 +57,7 @@ class RefreshMoviesUseCase constructor(
                             try {
                                 movieRepo.getDetails(it, configJob)
                             } catch (ex: Exception) {
-                                Log.e("ASD", "refreshall ex: ${ex.localizedMessage}")
+                                Log.e("ASD", "refreshdetails ex: ${ex.localizedMessage}")
                                 networkState.requestState(NetworkState.ERROR, ex.localizedMessage)
                             }
                         }
