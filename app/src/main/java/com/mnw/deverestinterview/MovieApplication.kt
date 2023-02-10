@@ -24,7 +24,7 @@ Requirements are:
  */
 
 @HiltAndroidApp
-class MovieApplication: Application() {
+open class MovieApplication: Application() {
 
     override fun onCreate() {
         super.onCreate()
