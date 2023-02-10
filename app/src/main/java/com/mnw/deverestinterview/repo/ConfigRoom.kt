@@ -33,6 +33,6 @@ class ConfigRoom @Inject constructor(
 
     }
 
-    private fun selectSize(body: MoviesDbConfiguration) = body.imagesConfig.posterSizes.getOrNull(0)
+    private fun selectSize(body: MoviesDbConfiguration) = body.imagesConfig.posterSizes.getOrNull(2)
 
 }

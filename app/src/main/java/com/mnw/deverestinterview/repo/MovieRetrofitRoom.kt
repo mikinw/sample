@@ -36,18 +36,13 @@ class MovieRetrofitRoom constructor(
     ) : this(moviesApi, movieDao, Dispatchers.IO)
 
     override val movies: LiveData<List<Movie>> = Transformations.map(movieDao.getAll()) {
-        Log.i("ASD", "Transformations")
-
         it.map { raw -> raw.asDomainModel() }.toList()
     }
 
     override suspend fun refreshAll(configJob: Deferred<((String) -> String)?>) {
         withContext(dispatcher) {
 
-            Log.i("ASD", "refreshall 1")
-
             val response = moviesApi.searchMovies("a")
-            Log.i("ASD", "refreshall 2")
 
             if (response.isSuccessful) {
                 response.body()?.let { body ->

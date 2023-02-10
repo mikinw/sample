@@ -3,24 +3,24 @@ package com.mnw.deverestinterview
 import android.content.ClipData
 import android.os.Bundle
 import android.view.DragEvent
-import androidx.fragment.app.Fragment
-import com.google.android.material.appbar.CollapsingToolbarLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.mnw.deverestinterview.placeholder.PlaceholderContent
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import com.bumptech.glide.Glide
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.mnw.deverestinterview.databinding.FragmentItemDetailBinding
+import com.mnw.deverestinterview.model.Movie
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
 class ItemDetailFragment : Fragment() {
 
-    /**
-     * The placeholder content this fragment is presenting.
-     */
-    private var item: PlaceholderContent.PlaceholderItem? = null
+    private val viewModel: DetailsViewModel by viewModels()
 
     lateinit var itemDetailTextView: TextView
     private var toolbarLayout: CollapsingToolbarLayout? = null
@@ -35,8 +35,7 @@ class ItemDetailFragment : Fragment() {
         if (event.action == DragEvent.ACTION_DROP) {
             val clipDataItem: ClipData.Item = event.clipData.getItemAt(0)
             val dragData = clipDataItem.text
-            item = PlaceholderContent.ITEM_MAP[dragData]
-            updateContent()
+            viewModel.setItemId(Integer.parseInt(dragData.toString()))
         }
         true
     }
@@ -45,11 +44,8 @@ class ItemDetailFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         arguments?.let {
-            if (it.containsKey(ARG_ITEM_ID)) {
-                // Load the placeholder content specified by the fragment
-                // arguments. In a real-world scenario, use a Loader
-                // to load content from a content provider.
-                item = PlaceholderContent.ITEM_MAP[it.getInt(ARG_ITEM_ID).toString()]
+            if (it.containsKey(ARG_ITEM_ID) && it.getInt(ARG_ITEM_ID) > 0) {
+                viewModel.setItemId(it.getInt(ARG_ITEM_ID))
             }
         }
     }
@@ -57,7 +53,7 @@ class ItemDetailFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentItemDetailBinding.inflate(inflater, container, false)
         val rootView = binding.root
@@ -65,26 +61,50 @@ class ItemDetailFragment : Fragment() {
         toolbarLayout = binding.toolbarLayout
         itemDetailTextView = binding.itemDetail
 
-        updateContent()
         rootView.setOnDragListener(dragListener)
 
         return rootView
     }
 
-    private fun updateContent() {
-        toolbarLayout?.title = item?.title
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel.item.observe(viewLifecycleOwner) {
+            updateContent(it)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as AppCompatActivity).supportActionBar?.hide()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        (activity as AppCompatActivity).supportActionBar?.show()
+    }
+
+    private fun updateContent(movie: Movie?) {
+
+        toolbarLayout?.title = movie?.title
 
         // Show the placeholder content as text in a TextView.
-        item?.let {
+        movie?.let {
             itemDetailTextView.text = it.overview
+
+            val imageUrl = it.posterPath
+
+            binding.imageDetails?.let { imageView ->
+                Glide
+                    .with(requireContext())
+                    .load(imageUrl)
+                    .centerCrop()
+                    .into(imageView)
+
+            }
         }
     }
 
     companion object {
-        /**
-         * The fragment argument representing the item ID that this fragment
-         * represents.
-         */
         const val ARG_ITEM_ID = "item_id"
     }
 
