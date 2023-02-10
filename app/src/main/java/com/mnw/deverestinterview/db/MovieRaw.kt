@@ -11,5 +11,5 @@ data class MovieRaw(
     val title: String,
     val overview: String,
     val releaseDate: String,
-    val thumbnail: String?,
+    val posterPath: String,
 )

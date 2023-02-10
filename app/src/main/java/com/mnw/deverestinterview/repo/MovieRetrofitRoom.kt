@@ -14,11 +14,11 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 private fun MovieData.toDatabaseEntity(): MovieRaw {
-    return MovieRaw(this.id, this.title, this.overview, this.releaseDate, this.thumbnail)
+    return MovieRaw(this.id, this.title, this.overview, this.releaseDate, this.posterPath)
 }
 
 private fun MovieRaw.asDomainModel(): Movie {
-    return Movie(this.id, this.title, this.overview, this.releaseDate, null)
+    return Movie(this.id, this.title, this.overview, this.releaseDate, this.posterPath)
 }
 
 class MovieRetrofitRoom @Inject constructor(

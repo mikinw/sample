@@ -8,6 +8,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.mnw.deverestinterview.ItemDetailFragment
 import com.mnw.deverestinterview.R
 import com.mnw.deverestinterview.databinding.ItemListContentBinding
@@ -33,7 +35,17 @@ class MovieRecyclerViewAdapter(
         holder.movieTitle.text = item.title
         holder.overview.text = item.overview
         holder.releaseDate.text = item.releaseDate
-        holder.thumbnail.setImageBitmap(item.thumbnail)
+
+        if (item.posterPath.isNotBlank()) {
+            val imageUrl = "https://image.tmdb.org/t/p/w342${item.posterPath}"
+            Glide
+                .with(holder.itemView)
+                .load(imageUrl)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .centerCrop()
+                .into(holder.thumbnail)
+
+        }
 
         with(holder.itemView) {
             tag = item

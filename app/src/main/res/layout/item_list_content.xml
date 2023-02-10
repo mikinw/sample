@@ -9,10 +9,10 @@
 
     <ImageView
         android:id="@+id/imageThumbnail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:minWidth="48dp"
+        android:layout_width="100dp"
+        android:layout_height="0dp"
+        android:contentDescription="@string/movie_poster"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars"
@@ -43,7 +43,7 @@
         app:layout_constraintStart_toEndOf="@id/imageThumbnail"
         app:layout_constraintTop_toBottomOf="@id/textTitle"
         android:textAlignment="textStart"
-        android:lines="3"
+        android:lines="4"
         android:ellipsize="end"
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec eros turpis, vehicula volutpat nunc eget, pretium vulputate sem. Ut id commodo mauris. Mauris accumsan est nisl, malesuada tempor velit dapibus sollicitudin. Sed eu eros quis lorem pulvinar gravida. Morbi porttitor est eros, in commodo mi pulvinar a. Proin eget turpis."
         />

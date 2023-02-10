@@ -26,7 +26,7 @@ data class MovieData(
     @SerializedName("overview")
     var overview: String,
     @SerializedName("poster_path")
-    var thumbnail: String,
+    var posterPath: String,
     @SerializedName("release_date")
     var releaseDate: String,
 )
