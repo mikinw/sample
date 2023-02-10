@@ -43,14 +43,21 @@ class MovieRetrofitRoom @Inject constructor(
                 val response = moviesApi.searchMovies("a")
 
                 if (response.isSuccessful) {
-                    response.body()?.movieList
-                        ?.map { movie ->
-                            movie.toDatabaseEntity()
-                        }
-                        ?.toList()
-                        ?.let {
-                            movieDao.insertAll(it)
-                        }
+                    response.body()?.let { body ->
+                        val freshIds = ArrayList<Int>()
+
+                        body.movieList
+                            ?.map { movie ->
+                                freshIds.add(movie.id)
+                                movie.toDatabaseEntity()
+                            }
+                            ?.toList()
+                            ?.let {
+                                movieDao.insertAll(it)
+                            }
+
+                        movieDao.deleteExcept(freshIds)
+                    }
 
                     networkState.requestState(NetworkState.NO_ACTIVITY)
 

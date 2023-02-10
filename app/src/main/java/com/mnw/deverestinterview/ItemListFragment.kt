@@ -10,7 +10,10 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.mnw.deverestinterview.app.MovieRecyclerViewAdapter
 import com.mnw.deverestinterview.databinding.FragmentItemListBinding
+import com.mnw.deverestinterview.model.NetworkState
+import com.mnw.deverestinterview.model.NetworkStateModel
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -19,8 +22,10 @@ class ItemListFragment : Fragment() {
     private val viewModel: ItemListViewModel by viewModels()
 
     private var _binding: FragmentItemListBinding? = null
-
     private val binding get() = _binding!!
+
+    @Inject
+    lateinit var networkStateModel: NetworkStateModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,6 +48,16 @@ class ItemListFragment : Fragment() {
 
         viewModel.movieList.observe(viewLifecycleOwner) {
             (binding.itemList.adapter as MovieRecyclerViewAdapter).submitList(it)
+        }
+
+        binding.swipeContainer.setOnRefreshListener {
+            viewModel.getMovieList()
+        }
+
+        networkStateModel.networkState.observe(viewLifecycleOwner) {
+            if (it == NetworkState.NO_ACTIVITY) {
+                binding.swipeContainer.isRefreshing = false
+            }
         }
 
         viewModel.getMovieList()
