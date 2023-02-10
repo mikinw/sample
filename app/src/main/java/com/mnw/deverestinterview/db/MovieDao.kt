@@ -26,4 +26,7 @@ interface MovieDao {
     @Query("DELETE FROM movie WHERE id NOT IN (:freshIds)")
     fun deleteExcept(freshIds: List<Int>): Int
 
+    @Query("DELETE FROM movie")
+    fun deleteAll()
+
 }

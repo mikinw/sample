@@ -8,6 +8,6 @@ interface MovieRepo {
 
     val movies: LiveData<List<Movie>>
 
-    suspend fun refreshAll(query: String, configJob: Deferred<((String) -> String)?>)
+    suspend fun refreshAll(query: String, configJob: Deferred<((String) -> String)?>): List<Int>
     suspend fun getDetails(id: Int, configJob: Deferred<((String) -> String)?>)
 }

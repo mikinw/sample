@@ -39,7 +39,8 @@ class RefreshMoviesUseCase constructor(
                     ret
                 }
 
-                launch {
+                val ids = async {
+                    val ret: List<Int> = emptyList()
                     try {
 
                         movieRepo.refreshAll(query, configJob)
@@ -48,11 +49,12 @@ class RefreshMoviesUseCase constructor(
                         ex.printStackTrace()
                         networkState.requestState(NetworkState.ERROR, ex.localizedMessage)
                     }
-                }.join()
+                    ret
+                }
 
 
                 launch {
-                    movieRepo.movies.value.orEmpty().map { movie -> movie.id }.forEach {
+                    ids.await().forEach {
                         launch {
                             try {
                                 movieRepo.getDetails(it, configJob)

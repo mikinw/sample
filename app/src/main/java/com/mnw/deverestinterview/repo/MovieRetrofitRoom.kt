@@ -10,7 +10,10 @@ import com.mnw.deverestinterview.model.Movie
 import com.mnw.deverestinterview.model.MovieRepo
 import com.mnw.deverestinterview.net.MovieData
 import com.mnw.deverestinterview.net.MoviesApi
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,14 +43,15 @@ class MovieRetrofitRoom constructor(
         it.map { raw -> raw.asDomainModel() }.toList()
     }
 
-    override suspend fun refreshAll(query: String, configJob: Deferred<((String) -> String)?>) {
-        withContext(dispatcher) {
+    override suspend fun refreshAll(query: String, configJob: Deferred<((String) -> String)?>): List<Int> {
+        return withContext(dispatcher) {
+            Log.i("ASD", "refreshAll: $query")
 
+            val freshIds = ArrayList<Int>()
             val response = moviesApi.searchMovies(query)
 
             if (response.isSuccessful) {
                 response.body()?.let { body ->
-                    val freshIds = ArrayList<Int>()
 
                     val posterPathBuilder = configJob.await()
                         ?: throw NetworkErrorException("Fetching configuration was unsuccessful")
@@ -65,9 +69,11 @@ class MovieRetrofitRoom constructor(
                         }
 
                     movieDao.deleteExcept(freshIds)
-                    Log.i("ASD", "refreshAll done")
+                    Log.i("ASD", "refreshAll done $freshIds")
+
 
                 }
+                freshIds
 
 
             } else {
@@ -99,7 +105,6 @@ class MovieRetrofitRoom constructor(
 
                 val movieRaw = movieData.toDatabaseEntity(posterPathBuilder)
 
-                Log.i("ASD", "new budget for $id: ${movieRaw.budget}")
                 movieDao.insert(movieRaw)
 
 

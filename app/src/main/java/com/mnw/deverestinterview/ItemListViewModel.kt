@@ -18,7 +18,7 @@ class ItemListViewModel @Inject constructor(
 
     val movieList = movieRepo.movies
 
-    var query: String = ""
+    private var query: String = ""
 
 
     fun refresh() {
